@@ -22,21 +22,18 @@ export class HeroService {
               private http: HttpClient) {}
 
   getHeroes(): Observable<Hero[]> {
-
-    //this.messageService.add('HeroService: fetched heroes');
     return this.http.get<Hero[]>(this.heroesUrl)
                     .pipe(
-                      tap(_ => this.log('HeroService: fetched heroes')),
+                      tap(_ => this.log('fetched heroes')),
                       catchError(this.handleError<Hero[]>('getHeroes', []))
                     );
   }
 
   getHero(id: number): Observable<Hero> {
-    //this.messageService.add(`HeroService: fetched hero id=${id}`);
     const url = `${this.heroesUrl}/${id}`;
     return this.http.get<Hero>(url)
                     .pipe(
-                      tap(_ => this.log(`HeroService: fetched hero id=${id}`)),
+                      tap(_ => this.log(`fetched hero id=${id}`)),
                       catchError(this.handleError<Hero>(`getHero id=${id}`))
                       );
   }
@@ -46,6 +43,36 @@ export class HeroService {
       tap((newHero: Hero) => this.log(`added hero w/ id=${newHero.id}`)),
       catchError(this.handleError<Hero>('addHero'))
     );
+  }
+
+  updateHero(hero: Hero): Observable<Hero> {
+      return this.http.put<Hero>(this.heroesUrl, hero, httpOptions)
+                  .pipe(
+                      tap(_ => this.log(`updated hero w/ id=${hero.id}`)),
+                      catchError(this.handleError<Hero>(`updateHero id=${hero.id}`))
+                  );
+   }
+
+  deleteHero(id: number): Observable<Hero> {
+    const url = `${this.heroesUrl}/${id}`;
+    return this.http.delete<Hero>(url, httpOptions)
+                .pipe(
+                    tap(_ => this.log(`deleteed hero id=${id}`)),
+                     catchError(this.handleError<Hero>(`deleteHero id=${id}`))
+                );
+  }
+
+  searchHeroes(term: string): Observable<Hero[]> {
+    if (!term.trim()) {
+      // if not search term, return empty hero array.
+      return of([]);
+    }
+    
+    return this.http.get<Hero[]>(`${this.heroesUrl}/?name=${term}`, httpOptions)
+                .pipe(
+                    tap(_ => this.log(`searshed heroes`)),
+                    catchError(this.handleError<Hero>(`searchHeroes`))
+                );
   }
 
   private log(message: string): void {
